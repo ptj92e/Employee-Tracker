@@ -22,3 +22,7 @@ last_name VARCHAR(30) NOT NULL,
 role_id INTEGER NOT NULL, 
 manager_id INTEGER NULL
 );
+
+SELECT * FROM department;
+SELECT * FROM role;
+SELECT * FROM employee;
