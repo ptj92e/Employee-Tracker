@@ -1,5 +1,6 @@
 let mysql = require("mysql");
 let inquirer = require("inquirer");
+let methods = require("./methods");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -43,44 +44,44 @@ function manageEmployee() {
     }).then(function (answer) {
         switch (answer.selection) {
             case "View all employees":
-                viewEmployees();
+                methods.viewEmployees();
                 break;
             case "View all departments":
-                viewDepartments();
+                methods.viewDepartments();
                 break;
             case "View all roles":
-                viewroles();
+                methods.viewRoles();
                 break;
             case "Add a new employee":
-                addEmployee();
+                methods.addEmployee();
                 break;
             case "Add a new department":
-                addDepartment();
+                methods.addDepartment();
                 break;
             case "Add a new role":
-                addRole();
+                methods.addRole();
                 break;
             case "Update an employee's role":
-                updateRole();
+                methods.updateRole();
                 break;
             case "Assign an employee a manager":
-                assignManager();
+                methods.assignManager();
                 break;
             case "View all manager's employees":
-                viewManEmp();
+                methods.viewManEmp();
                 break;
             case "Delete an employee":
-                deleteEmployee();
+                methods.deleteEmployee();
                 break;
             case "Delete a department":
-                deleteDepartment();
+                methods.deleteDepartment();
                 break;
             case "Delete a role":
-                deleteRole();
+                methods.deleteRole();
                 break;
             case "View a department's utilized budget":
-                viewBudget();
+                methods.viewBudget();
                 break;
         }
     });
-}
+};
