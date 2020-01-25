@@ -9,10 +9,10 @@ var connection = mysql.createConnection({
     port: 3306,
 
     // Your username
-    user: "root",
+    user: "ptj92e",
 
     // Your password
-    password: "",
+    password: "novaPuppy216",
     database: "employeeDB"
 });
 
@@ -85,3 +85,5 @@ function manageEmployee() {
         }
     });
 };
+
+module.exports = {manageEmployee};
