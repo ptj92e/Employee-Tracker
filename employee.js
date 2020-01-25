@@ -82,5 +82,5 @@ function manageEmployee() {
                 viewBudget();
                 break;
         }
-    })
+    });
 }
