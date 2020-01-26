@@ -52,7 +52,6 @@ function addRole() {
         for (let i = 0; i < result.length; i++) {
             choices.push(result[i].name);
         };
-        console.log(result);
         inquirer.prompt([
             {
                 name: "title",
