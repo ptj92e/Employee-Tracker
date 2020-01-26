@@ -35,7 +35,16 @@ function viewDepartments() {
 };
 
 function viewRoles() {
-    console.log("you did it");
+    let query = "SELECT * FROM role;"
+    connection.query(query, function(err, data) {
+        if (data.length === 0) {
+            console.log("There are no departments");
+        }
+        for (let i = 0; i < data.length; i++) {
+            console.log("Title: " + data[i].title + " || Salary: " + data[i].salary + " || Role ID: " + data[i].id + " || Department ID: " + data[i].department_id)
+        }
+        employee.manageEmployee();
+    });
 };
 
 function addEmployee() {
