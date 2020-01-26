@@ -18,10 +18,20 @@ var connection = mysql.createConnection({
 
 function viewEmployees() {
     console.log("you did it");
+    employee.manageEmployee();
 };
 
 function viewDepartments() {
-    console.log("you did it");
+    let query = "SELECT * FROM department;"
+    connection.query(query, function(err, data) {
+        if (data.length === 0) {
+            console.log("There are no departments");
+        }
+        for (let i = 0; i < data.length; i++) {
+            console.log("Department: " + data[i].name + " || ID: " + data[i].id)
+        }
+        employee.manageEmployee();
+    });
 };
 
 function viewRoles() {
