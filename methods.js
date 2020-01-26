@@ -25,22 +25,7 @@ function viewDepartments() {
 };
 
 function viewRoles() {
-    inquirer.prompt([
-        {
-            name: "name",
-            type: "input",
-            message: "What role would you like to add?"
-        },
-        {
-            name: "salary",
-            type: "input",
-            message: "How much is the salary for this job?"
-        }
-    ]).then(function (data) {
-        let query = "INSERT INTO department (name) VALUES (?)";
-        connection.query(query, data.name);
-        employee.manageEmployee();
-    });
+    console.log("you did it");
 };
 
 function addEmployee() {
@@ -60,7 +45,44 @@ function addDepartment() {
 };
 
 function addRole() {
-    console.log("you did it");
+
+    connection.query("SELECT * FROM department", function (err, result) {
+        if (err) throw err;
+        let choices = [];
+        for (let i = 0; i < result.length; i++) {
+            choices.push(result[i].name);
+        };
+        console.log(result);
+        inquirer.prompt([
+            {
+                name: "title",
+                type: "input",
+                message: "What role would you like to add?"
+            },
+            {
+                name: "salary",
+                type: "input",
+                message: "How much is the salary for this job?"
+            },
+            {
+                name: "department",
+                type: "list",
+                message: "What department does this employee belong to?",
+                choices: choices
+            }
+        ]).then(function (data) {
+            console.log(data.name);
+            let id = "";
+            for (let i = 0; i < result.length; i++) {
+                if (data.department === result[i].name) {
+                    id = parseInt(result[i].id);
+                }
+            }
+            let query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+            connection.query(query, [data.title, parseInt(data.salary), id]);
+            employee.manageEmployee();
+        });
+    });
 };
 
 function updateRole() {

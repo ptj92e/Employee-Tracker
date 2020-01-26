@@ -86,4 +86,4 @@ function manageEmployee() {
     });
 };
 
-module.exports = {manageEmployee};
+module.exports = manageEmployee;
