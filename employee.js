@@ -91,26 +91,30 @@ function viewEmployees() {
 };
 
 function viewDepartments() {
-    connection.query("SELECT * FROM role", function (err, result) {
+    connection.query("SELECT * FROM department", function (err, result) {
         if (err) throw err;
         let choices = [];
         for (let i = 0; i < result.length; i++) {
-            choices.push(result[i].title);
+            choices.push(result[i].name);
         };
         inquirer.prompt({
             name: "department",
             type: "list",
             message: "What department would you like to view?",
             choices: choices
-        }).then(function (data) {
-            let query = "SELECT * FROM employee;"
-            connection.query(query, function (err, data) {
+        }).then(function (info) {
+            let query = "SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name FROM employee AS e INNER JOIN role AS r ON e.role_id = r.id INNER JOIN department AS d on r.department_id = d.id WHERE d.name = ?;"
+            connection.query(query, info.department, function (err, data) {
                 if (err) throw err;
                 if (data.length === 0) {
                     console.log("There are no departments");
                 }
                 for (let i = 0; i < data.length; i++) {
-                    console.log("Department: " + data[i].name + " || ID: " + data[i].id)
+                    console.log("ID: " + data[i].id 
+                    + " || Name: " + data[i].first_name + " "+ data[i].last_name 
+                    +" || Role: " + data[i].title 
+                    + " || Salary: " + data[i].salary 
+                    + " || Department: " + data[i].name);
                 }
                 manageEmployee();
             });
