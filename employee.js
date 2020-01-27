@@ -258,7 +258,36 @@ function addRole() {
 };
 
 function updateRole() {
-    console.log("you did it");
+    connection.query("SELECT * FROM role;", function (err, role) {
+        if (err) throw err;
+        let roles = [];
+        for (let i = 0; i < role.length; i++) {
+            roles.push(role[i].title);
+        };
+        connection.query("SELECT * FROM employee;", function (err, employee) {
+            if (err) throw err;
+            let employees = [];
+            for (let i = 0; i < employee.length; i++) {
+                employees.push(employee[i].first_name + " " + employee[i].last_name);
+            };
+            inquirer.prompt([
+                {
+                    name: "employee",
+                    type: "list",
+                    message: "Which employee would you like to update?",
+                    choices: employees
+                },
+                {
+                    name: "role",
+                    type: "list",
+                    message: "What is their new role?",
+                    choices: roles
+                }
+            ]).then(function (data) {
+                console.log("you made it!")
+            });
+        });
+    });
 };
 
 function assignManager() {
