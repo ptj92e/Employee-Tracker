@@ -86,8 +86,20 @@ function manageEmployee() {
 };
 
 function viewEmployees() {
-    console.log("you did it");
-    manageEmployee();
+    connection.query("SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name FROM employee AS e INNER JOIN role AS r ON e.role_id = r.id INNER JOIN department AS d on r.department_id = d.id ORDER BY e.id;", function (err, data) {
+        if (err) throw err;
+        if (data.length === 0) {
+            console.log("There are no employees");
+        };
+        for (let i = 0; i < data.length; i++) {
+            console.log("ID: " + data[i].id
+                + " || Name: " + data[i].first_name + " " + data[i].last_name
+                + " || Role: " + data[i].title
+                + " || Salary: " + data[i].salary
+                + " || Department: " + data[i].name);
+        };
+        manageEmployee();
+    });
 };
 
 function viewDepartments() {
@@ -110,11 +122,11 @@ function viewDepartments() {
                     console.log("There are no departments");
                 }
                 for (let i = 0; i < data.length; i++) {
-                    console.log("ID: " + data[i].id 
-                    + " || Name: " + data[i].first_name + " "+ data[i].last_name 
-                    +" || Role: " + data[i].title 
-                    + " || Salary: " + data[i].salary 
-                    + " || Department: " + data[i].name);
+                    console.log("ID: " + data[i].id
+                        + " || Name: " + data[i].first_name + " " + data[i].last_name
+                        + " || Role: " + data[i].title
+                        + " || Salary: " + data[i].salary
+                        + " || Department: " + data[i].name);
                 }
                 manageEmployee();
             });
@@ -123,15 +135,34 @@ function viewDepartments() {
 };
 
 function viewRoles() {
-    let query = "SELECT * FROM role;"
-    connection.query(query, function (err, data) {
-        if (data.length === 0) {
-            console.log("There are no roles");
-        }
-        for (let i = 0; i < data.length; i++) {
-            console.log("Title: " + data[i].title + " || Salary: " + data[i].salary + " || Role ID: " + data[i].id + " || Department ID: " + data[i].department_id)
-        }
-        manageEmployee();
+    connection.query("SELECT * FROM role", function (err, result) {
+        if (err) throw err;
+        let choices = [];
+        for (let i = 0; i < result.length; i++) {
+            choices.push(result[i].title);
+        };
+        inquirer.prompt({
+            name: "role",
+            type: "list",
+            message: "What role would you like to view?",
+            choices: choices
+        }).then(function (info) {
+            let query = "SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name FROM employee AS e INNER JOIN role AS r ON e.role_id = r.id INNER JOIN department AS d on r.department_id = d.id WHERE r.title = ? ORDER BY e.id;"
+            connection.query(query, info.role, function (err, data) {
+                if (err) throw err;
+                if (data.length === 0) {
+                    console.log("There are no roles");
+                };
+                for (let i = 0; i < data.length; i++) {
+                    console.log("ID: " + data[i].id
+                        + " || Name: " + data[i].first_name + " " + data[i].last_name
+                        + " || Role: " + data[i].title
+                        + " || Salary: " + data[i].salary
+                        + " || Department: " + data[i].name);
+                };
+                manageEmployee();
+            });
+        });
     });
 };
 
