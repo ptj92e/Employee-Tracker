@@ -91,15 +91,30 @@ function viewEmployees() {
 };
 
 function viewDepartments() {
-    let query = "SELECT * FROM department;"
-    connection.query(query, function (err, data) {
-        if (data.length === 0) {
-            console.log("There are no departments");
-        }
-        for (let i = 0; i < data.length; i++) {
-            console.log("Department: " + data[i].name + " || ID: " + data[i].id)
-        }
-        manageEmployee();
+    connection.query("SELECT * FROM role", function (err, result) {
+        if (err) throw err;
+        let choices = [];
+        for (let i = 0; i < result.length; i++) {
+            choices.push(result[i].title);
+        };
+        inquirer.prompt({
+            name: "department",
+            type: "list",
+            message: "What department would you like to view?",
+            choices: choices
+        }).then(function (data) {
+            let query = "SELECT * FROM employee;"
+            connection.query(query, function (err, data) {
+                if (err) throw err;
+                if (data.length === 0) {
+                    console.log("There are no departments");
+                }
+                for (let i = 0; i < data.length; i++) {
+                    console.log("Department: " + data[i].name + " || ID: " + data[i].id)
+                }
+                manageEmployee();
+            });
+        });
     });
 };
 
