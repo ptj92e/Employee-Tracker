@@ -264,7 +264,7 @@ function updateRole() {
         for (let i = 0; i < role.length; i++) {
             roles.push(role[i].title);
         };
-        connection.query("SELECT * FROM employee;", function (err, employee) {
+        connection.query("SELECT e.first_name, e.last_name, e.role_id, r.title, r.id FROM employee AS e INNER JOIN role as r ON e.role_id = r.id;", function (err, employee) {
             if (err) throw err;
             let employees = [];
             for (let i = 0; i < employee.length; i++) {
@@ -284,7 +284,24 @@ function updateRole() {
                     choices: roles
                 }
             ]).then(function (data) {
-                console.log("you made it!")
+                for (let i = 0; i < employees.length; i++) {
+                    if (data.employee === employees[i] && data.role === employee[i].title) {
+                        console.log("That is already this employee's role.");
+                        return updateRole();
+                    };
+                };
+                let newID = "";
+                let name = data.employee.split(" ");
+                let firstName = name[0];
+                let lastName = name[1];
+                for (let i = 0; i < role.length; i++) {
+                    if (role[i].title === data.role) {
+                        newID = role[i].id;
+                    }
+                };
+                let query = "UPDATE employee SET employee.role_id = ? WHERE employee.first_name = ? AND employee.last_name = ?;";
+                connection.query(query, [newID, firstName, lastName]);
+                manageEmployee();
             });
         });
     });
@@ -299,7 +316,26 @@ function viewManEmp() {
 };
 
 function deleteEmployee() {
-    console.log("you did it");
+    connection.query("SELECT * FROM employee;", function (err, data) {
+        if (err) throw err;
+        let employees = [];
+        for (let i = 0; i < data.length; i++) {
+            employees.push(data[i].first_name + " " + data[i].last_name);
+        };
+        inquirer.prompt({
+            name: "deleted",
+            type: "list",
+            message: "Which employee would you like to delete?",
+            choices: employees
+        }).then(function(result) {
+            let name = result.deleted.split(" ");
+                let firstName = name[0];
+                let lastName = name[1];
+            let query = "DELETE FROM employee WHERE employee.first_name = ? AND employee.last_name = ?;";
+            connection.query(query, [firstName, lastName]);
+            manageEmployee();
+        });
+    });
 };
 
 function deleteDepartment() {
