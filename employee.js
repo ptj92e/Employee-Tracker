@@ -105,10 +105,7 @@ function viewEmployees() {
 function viewDepartments() {
     connection.query("SELECT * FROM department", function (err, result) {
         if (err) throw err;
-        let choices = [];
-        for (let i = 0; i < result.length; i++) {
-            choices.push(result[i].name);
-        };
+        let choices = result.map((department)=> department);
         inquirer.prompt({
             name: "department",
             type: "list",
@@ -119,7 +116,7 @@ function viewDepartments() {
             connection.query(query, info.department, function (err, data) {
                 if (err) throw err;
                 if (data.length === 0) {
-                    console.log("There are no departments");
+                    console.log("There are no employees in this department");
                 }
                 for (let i = 0; i < data.length; i++) {
                     console.log("ID: " + data[i].id
@@ -135,12 +132,9 @@ function viewDepartments() {
 };
 
 function viewRoles() {
-    connection.query("SELECT * FROM role", function (err, result) {
+    connection.query("SELECT * FROM role;", function (err, result) {
         if (err) throw err;
-        let choices = [];
-        for (let i = 0; i < result.length; i++) {
-            choices.push(result[i].title);
-        };
+        let choices = result.map((role) => {return role.title});
         inquirer.prompt({
             name: "role",
             type: "list",
@@ -151,7 +145,7 @@ function viewRoles() {
             connection.query(query, info.role, function (err, data) {
                 if (err) throw err;
                 if (data.length === 0) {
-                    console.log("There are no roles");
+                    console.log("There are no employees in this role");
                 };
                 for (let i = 0; i < data.length; i++) {
                     console.log("ID: " + data[i].id
@@ -169,10 +163,7 @@ function viewRoles() {
 function addEmployee() {
     connection.query("SELECT * FROM role", function (err, result) {
         if (err) throw err;
-        let choices = [];
-        for (let i = 0; i < result.length; i++) {
-            choices.push(result[i].title);
-        };
+        let choices = result.map((role) => {return role.title});
         inquirer.prompt([
             {
                 name: "firstName",
@@ -221,10 +212,7 @@ function addRole() {
 
     connection.query("SELECT * FROM department", function (err, result) {
         if (err) throw err;
-        let choices = [];
-        for (let i = 0; i < result.length; i++) {
-            choices.push(result[i].name);
-        };
+        let choices = result.map((department) => {return department.name});
         inquirer.prompt([
             {
                 name: "title",
@@ -258,18 +246,12 @@ function addRole() {
 };
 
 function updateRole() {
-    connection.query("SELECT * FROM role;", function (err, role) {
+    connection.query("SELECT * FROM role;", function (err, result) {
         if (err) throw err;
-        let roles = [];
-        for (let i = 0; i < role.length; i++) {
-            roles.push(role[i].title);
-        };
-        connection.query("SELECT e.first_name, e.last_name, e.role_id, r.title, r.id FROM employee AS e INNER JOIN role as r ON e.role_id = r.id;", function (err, employee) {
+        let roles = result.map((role) => {return role.title})
+        connection.query("SELECT e.first_name, e.last_name, e.role_id, r.title, r.id FROM employee AS e INNER JOIN role as r ON e.role_id = r.id;", function (err, info) {
             if (err) throw err;
-            let employees = [];
-            for (let i = 0; i < employee.length; i++) {
-                employees.push(employee[i].first_name + " " + employee[i].last_name);
-            };
+            let employees = info.map((employee) => {return employee.first_name + " " + employee.last_name});
             inquirer.prompt([
                 {
                     name: "employee",
@@ -285,7 +267,7 @@ function updateRole() {
                 }
             ]).then(function (data) {
                 for (let i = 0; i < employees.length; i++) {
-                    if (data.employee === employees[i] && data.role === employee[i].title) {
+                    if (data.employee === employees[i] && data.role === info[i].title) {
                         console.log("That is already this employee's role.");
                         return updateRole();
                     };
@@ -294,9 +276,9 @@ function updateRole() {
                 let name = data.employee.split(" ");
                 let firstName = name[0];
                 let lastName = name[1];
-                for (let i = 0; i < role.length; i++) {
-                    if (role[i].title === data.role) {
-                        newID = role[i].id;
+                for (let i = 0; i < result.length; i++) {
+                    if (result[i].title === data.role) {
+                        newID = result[i].id;
                     }
                 };
                 let query = "UPDATE employee SET employee.role_id = ? WHERE employee.first_name = ? AND employee.last_name = ?;";
@@ -318,10 +300,7 @@ function viewManEmp() {
 function deleteEmployee() {
     connection.query("SELECT * FROM employee;", function (err, data) {
         if (err) throw err;
-        let employees = [];
-        for (let i = 0; i < data.length; i++) {
-            employees.push(data[i].first_name + " " + data[i].last_name);
-        };
+        let employees = data.map((employee) => {return employee.first_name + " " + employee.last_name})
         inquirer.prompt({
             name: "deleted",
             type: "list",
@@ -339,11 +318,37 @@ function deleteEmployee() {
 };
 
 function deleteDepartment() {
-    console.log("you did it");
+    connection.query("SELECT * FROM department", function(err, data) {
+        if (err) throw err;
+        let departments = data.map((department) => {return department.name});
+        inquirer.prompt({
+            name: "department",
+            type: "list",
+            message: "Which department woudl you like to delete?",
+            choices: departments
+        }).then(function(result) {
+            let query = "DELETE FROM department WHERE department.name = ?;";
+            connection.query(query, [result.department]);
+            manageEmployee()
+        });
+    });
 };
 
 function deleteRole() {
-    console.log("you did it");
+    connection.query("SELECT * FROM role", function(err, data) {
+        if (err) throw err;
+        let roles = data.map(function(role) {return role.title});
+        inquirer.prompt({
+            name: "role",
+            type: "list",
+            message: "Which role would you like to delete?",
+            choices: roles
+        }).then(function(result) {
+            let query = "DELETE FROM role WHERE role.title = ?;";
+            connection.query(query, [result.role]);
+            manageEmployee();
+        });
+    });
 };
 
 function viewBudget() {
