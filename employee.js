@@ -352,5 +352,22 @@ function deleteRole() {
 };
 
 function viewBudget() {
-    console.log("you did it");
+    connection.query("SELECT * FROM department", function(err, result){
+        if (err) throw err;
+        let departments = result.map(function(department) {return department.name});
+        inquirer.prompt({
+            name: "department",
+            type: "list",
+            message: "Which department's utilized budget would you like to view?",
+            choices: departments
+        }).then(function(info) {
+            connection.query("SELECT r.title, r.salary, d.name, e.first_name, e.last_name FROM role AS r INNER JOIN department AS d ON r.department_id = d.id INNER JOIN employee as e ON e.role_id = r.id WHERE d.name = ?;", [info.department], function(err, data) {
+                if (err) throw err;
+                let salaries = data.map(function(employee) {return employee.salary});
+                let budget = salaries.reduce(function(a, b) {return a + b});
+                console.log("The " + info.department + " department has used $" + budget + ".");
+                manageEmployee();
+            });
+        });
+    });
 };
