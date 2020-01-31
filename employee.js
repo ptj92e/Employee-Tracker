@@ -8,10 +8,10 @@ var connection = mysql.createConnection({
     port: 3306,
 
     // Your username
-    user: "ptj92e",
+    user: "root",
 
     // Your password
-    password: "novaPuppy216",
+    password: "",
     database: "employeeDB"
 });
 
@@ -88,7 +88,6 @@ function manageEmployee() {
 function viewEmployees() {
     connection.query("SELECT CONCAT(e.first_name, ' ', e.last_name) AS employee, r.title, r.salary, d.name, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee AS e INNER JOIN role AS r ON r.id = e.role_id INNER JOIN department AS d ON d.id = r.department_id LEFT JOIN employee AS m ON m.id = e.manager_id;", function (err, data) {
         if (err) throw err;
-        console.log(data);
         if (data.length === 0) {
             console.log("There are no employees");
         };
