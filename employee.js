@@ -86,17 +86,19 @@ function manageEmployee() {
 };
 
 function viewEmployees() {
-    connection.query("SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name FROM employee AS e INNER JOIN role AS r ON e.role_id = r.id INNER JOIN department AS d on r.department_id = d.id ORDER BY e.id;", function (err, data) {
+    connection.query("SELECT CONCAT(e.first_name, ' ', e.last_name) AS employee, r.title, r.salary, d.name, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee AS e INNER JOIN role AS r ON r.id = e.role_id INNER JOIN department AS d ON d.id = r.department_id LEFT JOIN employee AS m ON m.id = e.manager_id;", function (err, data) {
         if (err) throw err;
+        console.log(data);
         if (data.length === 0) {
             console.log("There are no employees");
         };
         for (let i = 0; i < data.length; i++) {
             console.log("ID: " + data[i].id
-                + " || Name: " + data[i].first_name + " " + data[i].last_name
+                + " || Name: " + data[i].employee
                 + " || Role: " + data[i].title
                 + " || Salary: " + data[i].salary
-                + " || Department: " + data[i].name);
+                + " || Department: " + data[i].name
+                + " || Manager: " + data[i].manager);
         };
         manageEmployee();
     });
@@ -112,7 +114,7 @@ function viewDepartments() {
             message: "What department would you like to view?",
             choices: choices
         }).then(function (info) {
-            let query = "SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name FROM employee AS e INNER JOIN role AS r ON e.role_id = r.id INNER JOIN department AS d on r.department_id = d.id WHERE d.name = ?;"
+            let query = "SELECT CONCAT(e.first_name, ' ', e.last_name) AS employee, r.title, r.salary, d.name, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee AS e INNER JOIN role AS r ON r.id = e.role_id INNER JOIN department AS d ON d.id = r.department_id LEFT JOIN employee AS m ON m.id = e.manager_id WHERE d.name = ?;"
             connection.query(query, info.department, function (err, data) {
                 if (err) throw err;
                 if (data.length === 0) {
@@ -120,10 +122,11 @@ function viewDepartments() {
                 }
                 for (let i = 0; i < data.length; i++) {
                     console.log("ID: " + data[i].id
-                        + " || Name: " + data[i].first_name + " " + data[i].last_name
+                        + " || Name: " + data[i].employee
                         + " || Role: " + data[i].title
                         + " || Salary: " + data[i].salary
-                        + " || Department: " + data[i].name);
+                        + " || Department: " + data[i].name
+                        + " || Manager: " + data[i].manager);
                 }
                 manageEmployee();
             });
@@ -141,7 +144,7 @@ function viewRoles() {
             message: "What role would you like to view?",
             choices: choices
         }).then(function (info) {
-            let query = "SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name FROM employee AS e INNER JOIN role AS r ON e.role_id = r.id INNER JOIN department AS d on r.department_id = d.id WHERE r.title = ? ORDER BY e.id;"
+            let query = "SELECT CONCAT(e.first_name, ' ', e.last_name) AS employee, r.title, r.salary, d.name, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee AS e INNER JOIN role AS r ON r.id = e.role_id INNER JOIN department AS d ON d.id = r.department_id LEFT JOIN employee AS m ON m.id = e.manager_id WHERE r.title = ?;"
             connection.query(query, info.role, function (err, data) {
                 if (err) throw err;
                 if (data.length === 0) {
@@ -149,10 +152,11 @@ function viewRoles() {
                 };
                 for (let i = 0; i < data.length; i++) {
                     console.log("ID: " + data[i].id
-                        + " || Name: " + data[i].first_name + " " + data[i].last_name
+                        + " || Name: " + data[i].employee
                         + " || Role: " + data[i].title
                         + " || Salary: " + data[i].salary
-                        + " || Department: " + data[i].name);
+                        + " || Department: " + data[i].name
+                        + " || Manager: " + data[i].manager);
                 };
                 manageEmployee();
             });
@@ -231,7 +235,6 @@ function addRole() {
                 choices: choices
             }
         ]).then(function (data) {
-            console.log(data.name);
             let departmentID = "";
             for (let i = 0; i < result.length; i++) {
                 if (data.department === result[i].name) {
@@ -290,11 +293,77 @@ function updateRole() {
 };
 
 function assignManager() {
-    console.log("you did it");
+    connection.query("SELECT * FROM employee;", function(err, data) {
+        if (err) throw err;
+        let employees = data.map(function(employee) {return employee.first_name + " " + employee.last_name});
+        inquirer.prompt([
+            {
+                name: "employee",
+                type: "list",
+                message: "Which employee do you want to assign a manager?",
+                choices: employees
+            },
+            {
+                name: "manager",
+                type: "list",
+                message: "Who is this employee's manager?",
+                choices: employees
+            }
+        ]).then(function(result) {
+            let employeeName = result.employee.split(" ");
+            let employeeFirst = employeeName[0];
+            let employeeLast = employeeName[1];
+            let managerName = result.manager.split(" ");
+            let managerFirst = managerName[0];
+            let managerLast = managerName[1];
+            let managerID = "";
+            for (let i = 0; i < data.length; i++) {
+                if (managerFirst === data[i].first_name && managerLast === data[i].last_name) {
+                    managerID = data[i].id;
+                }
+            }
+            let query = "UPDATE employee SET employee.manager_id = ? WHERE employee.first_name = ? AND employee.last_name = ?;"
+            connection.query(query, [managerID, employeeFirst, employeeLast]);
+            manageEmployee();
+        });
+    });
 };
 
 function viewManEmp() {
-    console.log("you did it");
+    connection.query("SELECT e.id, CONCAT(e.first_name, ' ', e.last_name) AS employee, e.manager_id, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee AS e LEFT JOIN employee AS m ON m.id = e.manager_id", function(err, data) {
+        if (err) throw err;
+        let managers = [];
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].manager_id !== null) {
+                managers.push(data[i].manager);
+            };
+        };
+        inquirer.prompt({
+            name: "manager",
+            type: "list",
+            message: "Which manager's employees do you want to view?",
+            choices: managers
+        }).then(function(result) {
+            let query = "SELECT CONCAT(e.first_name, ' ', e.last_name) AS employee, r.title, r.salary, d.name, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee AS e INNER JOIN role AS r ON r.id = e.role_id INNER JOIN department AS d ON d.id = r.department_id LEFT JOIN employee AS m ON m.id = e.manager_id WHERE e.manager_id = ?;"
+            let manID = "";
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].employee === result.manager) {
+                    manID = data[i].id;
+                }
+            }
+            connection.query(query, manID, function(err, info) {
+                if (err) throw err;
+                for (let i = 0; i < info.length; i++) {
+                    console.log("ID: " + info[i].id
+                    + " || Name: " + info[i].employee
+                    + " || Role: " + info[i].title
+                    + " || Salary: " + info[i].salary
+                    + " || Department: " + info[i].name);
+                };
+            });
+            manageEmployee();
+        });
+    });
 };
 
 function deleteEmployee() {
