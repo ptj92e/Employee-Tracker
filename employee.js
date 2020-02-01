@@ -8,10 +8,10 @@ var connection = mysql.createConnection({
     port: 3306,
 
     // Your username
-    user: "root",
+    user: "ptj92e",
 
     // Your password
-    password: "",
+    password: "novaPuppy216",
     database: "employeeDB"
 });
 
@@ -91,14 +91,7 @@ function viewEmployees() {
         if (data.length === 0) {
             console.log("There are no employees");
         };
-        for (let i = 0; i < data.length; i++) {
-            console.log("ID: " + data[i].id
-                + " || Name: " + data[i].employee
-                + " || Role: " + data[i].title
-                + " || Salary: " + data[i].salary
-                + " || Department: " + data[i].name
-                + " || Manager: " + data[i].manager);
-        };
+        console.table(data);
         manageEmployee();
     });
 };
@@ -119,14 +112,7 @@ function viewDepartments() {
                 if (data.length === 0) {
                     console.log("There are no employees in this department");
                 }
-                for (let i = 0; i < data.length; i++) {
-                    console.log("ID: " + data[i].id
-                        + " || Name: " + data[i].employee
-                        + " || Role: " + data[i].title
-                        + " || Salary: " + data[i].salary
-                        + " || Department: " + data[i].name
-                        + " || Manager: " + data[i].manager);
-                }
+                console.table(data);
                 manageEmployee();
             });
         });
@@ -149,14 +135,7 @@ function viewRoles() {
                 if (data.length === 0) {
                     console.log("There are no employees in this role");
                 };
-                for (let i = 0; i < data.length; i++) {
-                    console.log("ID: " + data[i].id
-                        + " || Name: " + data[i].employee
-                        + " || Role: " + data[i].title
-                        + " || Salary: " + data[i].salary
-                        + " || Department: " + data[i].name
-                        + " || Manager: " + data[i].manager);
-                };
+                console.table(data);
                 manageEmployee();
             });
         });
@@ -352,15 +331,9 @@ function viewManEmp() {
             }
             connection.query(query, manID, function(err, info) {
                 if (err) throw err;
-                for (let i = 0; i < info.length; i++) {
-                    console.log("ID: " + info[i].id
-                    + " || Name: " + info[i].employee
-                    + " || Role: " + info[i].title
-                    + " || Salary: " + info[i].salary
-                    + " || Department: " + info[i].name);
-                };
+                console.table(info);
+                manageEmployee();
             });
-            manageEmployee();
         });
     });
 };
